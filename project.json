@@ -1,0 +1,20 @@
+{
+  "id": 16,
+  "title": "Smart Entryway Offline Automation",
+  "repository_slug": "smart-entryway-offline-automation",
+  "category": "Smart Home",
+  "platform": "Raspberry Pi Zero 2 W",
+  "platform_family": "python",
+  "difficulty": "Intermediate",
+  "estimated_hours": 28,
+  "connectivity": "BLE",
+  "components": [
+    "servo motor",
+    "PIR sensor"
+  ],
+  "scope": "Build a smart home prototype that uses servo motor, PIR sensor to run rules without cloud access. Include setup instructions, a circuit diagram, tested firmware, and sample output.",
+  "key_deliverable": "Offline Automation demonstration with repeatable test steps",
+  "mode": "closed_loop_control",
+  "entrypoint": "src/main.py",
+  "roadmap_source": "openmaker-2100-project-roadmap.xlsx"
+}
