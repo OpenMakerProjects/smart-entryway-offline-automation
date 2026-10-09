@@ -1,9 +1,3 @@
 # Architecture
 
-```text
-Sensors -> validation and filtering -> closed loop control -> output/alert
-                                      |
-                                      +-> BLE telemetry and logs
-```
-
-The implementation separates acquisition, decision logic, output handling, and telemetry. Hardware-specific access is kept at the edge so the core behavior can be tested with simulated readings.
+Local monotonic-time policy drives PIR-to-pointer behavior without cloud, internet or BLE. Hardware adapter uses gpiozero with pigpio PWM. Optional Bless/BlueZ GATT reports JSON and accepts STOP/RESUME inhibition; no direct angle command. Simulation and the legacy Controller API remain available. Cleanup rests the pointer. No process-crash watchdog is provided.
