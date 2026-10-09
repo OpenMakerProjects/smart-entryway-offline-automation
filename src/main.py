@@ -40,30 +40,26 @@ class Controller:
         return Snapshot(timestamp or time.time(), values, score, valid)
 
 
-def simulated_values(step: int) -> list[float]:
-    phase = step / 5.0 + PROJECT_ID / 17.0
-    return [round((math.sin(phase + offset) + 1.0) / 2.0, 4) for offset in (0.0, 1.4, 2.8)]
 
-
-def run(iterations: int, interval: float, threshold: float) -> None:
-    controller = Controller(threshold=threshold)
+from .policy import MotionRule
+def run(iterations: int, interval: float, threshold: float = DEFAULT_THRESHOLD) -> None:
+    # Retained CLI threshold only applies to the compatibility Controller API.
+    rule=MotionRule(start=0)
     for step in range(iterations):
-        snapshot = controller.evaluate(simulated_values(step))
-        record = asdict(snapshot) | {
-            "project_id": PROJECT_ID,
-            "mode": MODE,
-            "state": "active" if controller.output_active else ("normal" if snapshot.valid else "fault"),
-            "output": controller.output_active,
-        }
-        print(json.dumps(record, sort_keys=True))
-        if interval > 0:
-            time.sleep(interval)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--iterations", type=int, default=10)
-    parser.add_argument("--interval", type=float, default=0.5)
-    parser.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD)
-    options = parser.parse_args()
-    run(max(1, options.iterations), max(0.0, options.interval), options.threshold)
+        now=step*10.0
+        record=rule.sample(now, bool(step%4 in (1,2)))
+        print(json.dumps({"project_id":16,"mode":"simulation",**record},sort_keys=True))
+        if interval>0: time.sleep(interval)
+if __name__=="__main__":
+    parser=argparse.ArgumentParser(description="Local PIR-to-pointer rule, optional BLE, explicit hardware mode")
+    parser.add_argument("--iterations",type=int,default=10)
+    parser.add_argument("--interval",type=float,default=0.5)
+    parser.add_argument("--threshold",type=float,default=DEFAULT_THRESHOLD)
+    parser.add_argument("--hardware",action="store_true")
+    parser.add_argument("--ble",action="store_true")
+    options=parser.parse_args()
+    if options.hardware:
+        import asyncio
+        from .hardware import operate
+        asyncio.run(operate(options.iterations,max(0.05,options.interval),options.ble))
+    else: run(max(1,options.iterations),max(0,options.interval),options.threshold)

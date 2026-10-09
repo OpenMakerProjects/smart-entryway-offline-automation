@@ -1,0 +1,19 @@
+name: Completion gates
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  host-adapters:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python tools/validate.py
+          pip install -r requirements.txt
+          python -m compileall -q src
+          python -m unittest discover -s tests -v
+          python -m src.main --iterations 10 --interval 0
+          python tools/validate_completion.py
